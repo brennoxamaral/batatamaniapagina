@@ -1,0 +1,6 @@
+{
+  "name": "Batata Mania",
+  "description": "Modern landing page for Batata Mania, a delivery service specializing in delicious stuffed potatoes in Cassilândia, with user-generated content, interactive ordering, and custom Brazilian cuisine stylings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
