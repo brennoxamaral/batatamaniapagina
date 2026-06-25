@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Phone, Navigation, Clock, ShieldCheck, Heart, ArrowRight } from "lucide-react";
+import { Phone, Navigation, Clock, ShieldCheck, Heart, ArrowRight, Trophy, Star } from "lucide-react";
 import Logo from "./components/Logo";
 import PotatoPattern from "./components/PotatoPattern";
 import HighlightBlock from "./components/HighlightBlock";
@@ -74,7 +74,7 @@ export default function App() {
 
   return (
     <div id="landing-page-root" className="min-h-screen flex flex-col font-sans relative text-[#4B3621] overflow-x-hidden">
-      
+
       {/* Background Layer with Illustrated Potatoes on Off-White */}
       <PotatoPattern />
 
@@ -93,7 +93,7 @@ export default function App() {
 
       {/* HERO SECTION */}
       <section id="hero-section" className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-12 max-w-4xl mx-auto">
-        
+
         {/* Highlight Block: "Sabor que apaixona" in handwriting */}
         <div className="mb-6 flex justify-center">
           <HighlightBlock />
@@ -135,7 +135,7 @@ export default function App() {
           {/* CTA 1: "Faça seu pedido" with E1AD01 gradient, hover pulse, external url */}
           <a
             id="cta-order-now"
-            href="https://pedido.brendi.com.br/batata-mania"
+            href="https://pedido.brendi.com.br/batata-mania-1"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#E1AD01] to-[#C79801] text-[#4B3621] font-bold text-base tracking-wide flex items-center justify-center gap-2.5 shadow-lg border border-[#4B3621]/10 transition-all cursor-pointer animate-pulse-cta"
@@ -192,70 +192,79 @@ export default function App() {
         <Carousel />
       </section>
 
-      {/* DETAILED FEATURES / STORY SHOWCASE */}
-      <section id="story-section" className="relative z-10 w-full max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-white/30 backdrop-blur-lg rounded-3xl border border-white/45 p-8 md:p-12 shadow-xl">
-          {/* Visual card of signature look */}
-          <div className="relative aspect-video lg:aspect-square w-full rounded-2xl overflow-hidden shadow-lg border border-[#4B3621]/15 group">
-            <img
-              src="https://images.unsplash.com/photo-1603055251476-7521204f95b1?auto=format&fit=crop&q=80&w=800"
-              alt="Batata Recheada Preparada e Quente"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              referrerPolicy="no-referrer"
-            />
-            {/* Ambient heat ripple gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#4B3621]/70 via-black/10 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 text-white text-left">
-              <span className="bg-[#E1AD01] text-[#4B3621] text-[10px] font-mono tracking-widest uppercase font-black px-2.5 py-1 rounded-full mb-2.5 inline-block">
-                O SEGREDO DA CREMOSIDADE
-              </span>
-              <h3 className="text-xl md:text-2xl font-serif font-bold text-[#F2EBE3]">
-                Batata inglesa gigante de verdade.
-              </h3>
-              <p className="text-xs md:text-sm text-stone-200 mt-1">
-                Assadas lentamente e escavadas à mão para receber a quantidade perfeita de manteiga e recheio de ponta a ponta.
-              </p>
+
+      {/* COMBO DO HEXA SECTION */}
+      <section id="combo-hexa" className="relative z-10 w-full max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-gradient-to-br from-[#F0FDF4] to-[#FEFCE8] border border-[#BBF7D0] rounded-3xl p-6 md:p-10 shadow-[0_10px_40px_-10px_rgba(22,163,74,0.15)] flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden group">
+          {/* Decorative trophies/stars */}
+          <div className="absolute -top-10 -right-10 text-green-700/5 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-12">
+            <Trophy size={200} fill="currentColor" />
+          </div>
+          <div className="absolute -bottom-10 -left-10 text-yellow-500/5 transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-12">
+            <Star size={150} fill="currentColor" />
+          </div>
+
+          <div className="w-full md:w-1/2 relative z-10">
+            <div className="aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white relative group-hover:shadow-green-600/20 transition-all duration-500">
+              <img
+                src="/combo-hexa.jpeg"
+                alt="Combo do Hexa"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute top-4 left-4 bg-green-700 text-white text-[10px] font-mono font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-md flex items-center gap-1.5">
+                <Trophy size={12} className="text-yellow-400 fill-yellow-400" /> Especial Rumo ao Hexa 🇧🇷
+              </div>
             </div>
           </div>
 
-          {/* Core pitch list info */}
-          <div className="text-left flex flex-col justify-center">
-            <span className="text-xs font-mono font-bold tracking-widest text-[#E1AD01] uppercase mb-1">
-              Como Fazemos Acontecer
-            </span>
-            <h2 className="text-3xl md:text-4xl font-serif font-black text-[#4B3621] tracking-tight mb-6">
-              A verdadeira arte de rechear batatas
+          <div className="w-full md:w-1/2 flex flex-col justify-center relative z-10 text-left">
+            <div className="flex items-center gap-2 mb-3 text-green-700">
+              <Trophy size={18} className="animate-bounce text-yellow-500 fill-yellow-500" />
+              <span className="text-xs font-bold tracking-widest uppercase bg-green-100 text-green-800 px-2 py-1 rounded-md">Oferta Limitada</span>
+            </div>
+
+            <h2 className="text-4xl md:text-5xl font-serif font-black text-[#4B3621] mb-3 leading-tight">
+              Combo do Hexa
             </h2>
-            
-            <p className="text-sm md:text-base text-[#4B3621]/85 leading-relaxed mb-6">
-              Nossa missão em Cassilândia é entregar uma refeição completa, prática e extremamente satisfatória na porta da sua casa. Unimos ingredientes frescos de alta qualidade com um método de preparo artesanal.
+
+            <p className="text-sm md:text-base text-[#4B3621]/80 mb-6 font-medium leading-relaxed">
+              Reúna a torcida com o melhor sabor! O combo campeão perfeito para vibrar e comemorar cada gol da nossa seleção.
             </p>
 
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <span className="text-xl shrink-0 mt-0.5">🥔</span>
-                <div>
-                  <h4 className="font-bold text-sm text-[#4B3621]">Tamanho Exagerado</h4>
-                  <p className="text-xs text-[#4B3621]/70">Nossas batatas têm peso médio de 500g a 700g, garantindo uma refeição robusta.</p>
+            <ul className="space-y-3 mb-8 bg-white/60 backdrop-blur-sm p-5 rounded-2xl border border-white shadow-sm">
+              <li className="flex items-center gap-3">
+                <div className="bg-green-100 p-1.5 rounded-lg text-green-700 shrink-0">
+                  <Star size={16} className="text-yellow-600 fill-yellow-500" />
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="text-xl shrink-0 mt-0.5">🥓</span>
-                <div>
-                  <h4 className="font-bold text-sm text-[#4B3621]">Ingredientes Originais</h4>
-                  <p className="text-xs text-[#4B3621]/70">Cheddar cremoso e requeijão Catupiry original. Recuse imitações.</p>
+                <span className="text-sm font-bold text-[#4B3621]">2 Batatas gigantes recheadas <span className="font-normal text-[#4B3621]/70">(Sabor à sua escolha)</span></span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="bg-green-100 p-1.5 rounded-lg text-green-700 shrink-0">
+                  <span className="text-sm px-0.5 font-black">2L</span>
                 </div>
-              </div>
+                <span className="text-sm font-bold text-[#4B3621]">1 Guaraná Antarctica 2L</span>
+              </li>
+            </ul>
 
-              <div className="flex items-start gap-3">
-                <span className="text-xl shrink-0 mt-0.5">🔥</span>
-                <div>
-                  <h4 className="font-bold text-sm text-[#4B3621]">Saiu do Forno, Chegou na Mesa</h4>
-                  <p className="text-xs text-[#4B3621]/70">Sistema logístico exclusivo focado na rapidez do envio por toda a cidade.</p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 mb-8">
+              <div className="flex flex-col bg-white/50 px-4 py-2 rounded-xl border border-white">
+                <span className="text-xs text-green-700/70 line-through font-bold uppercase tracking-wider mb-0.5">De R$ 88,00</span>
+                <div className="flex items-end gap-1.5">
+                  <span className="text-sm font-black text-green-700 mb-1">por</span>
+                  <span className="text-3xl md:text-4xl font-black text-green-700 leading-none">R$ 78,00</span>
                 </div>
               </div>
             </div>
+
+            <a
+              href="https://pedido.brendi.com.br/batata-mania-1/produto/combo-do-hexa-2-batatas-recheadas-no-pote-1-de-estrogonofe-de-frango-e-1-de-estrogonofe-de-carne"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold text-base tracking-wide flex items-center justify-center gap-2.5 shadow-lg shadow-green-600/30 transition-all cursor-pointer transform hover:-translate-y-1"
+            >
+              Pedir Combo do Hexa
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </a>
           </div>
         </div>
       </section>
@@ -299,7 +308,7 @@ export default function App() {
                 <h3 className="font-sans font-black text-lg text-[#4B3621] mb-1.5 leading-tight">
                   {dish.name}
                 </h3>
-                
+
                 <p className="text-xs text-[#4B3621]/75 leading-relaxed mb-4">
                   {dish.description}
                 </p>
@@ -317,7 +326,7 @@ export default function App() {
 
                 <a
                   id={`btn-order-dish-${dish.id}`}
-                  href="https://pedido.brendi.com.br/batata-mania"
+                  href="https://pedido.brendi.com.br/batata-mania-1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 rounded-xl bg-[#4B3621]/5 hover:bg-[#E1AD01] hover:text-[#4B3621] text-[#4B3621] font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer"
@@ -337,7 +346,7 @@ export default function App() {
         <div className="bg-gradient-to-r from-[#4B3621] to-[#3B2816] rounded-3xl text-[#F2EBE3] p-8 md:p-12 text-center md:text-left relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Subtle background glows */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#E1AD01] opacity-5 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="space-y-3 relative z-10">
             <h3 className="text-2xl md:text-3xl font-serif font-bold text-white">
               Pronto para saborear a sua batata?
@@ -350,7 +359,7 @@ export default function App() {
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto shrink-0 relative z-10">
             <a
               id="cta-contact-footer-order"
-              href="https://pedido.brendi.com.br/batata-mania"
+              href="https://pedido.brendi.com.br/batata-mania-1"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#E1AD01] hover:bg-[#F2EBE3] hover:text-[#4B3621] text-[#4B3621] font-bold text-sm tracking-wide shadow-md transition-all text-center cursor-pointer"
@@ -374,7 +383,7 @@ export default function App() {
 
       {/* FOOTER SECTION: Brown background #4B3621, centered logo, and below is "Sabor que apaixona" in off-white handwriting font */}
       <footer id="landing-footer" className="relative z-10 bg-[#4B3621] text-[#F2EBE3] pt-14 pb-12 px-4 shadow-[0_-5px_25px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center text-center">
-        
+
         {/* Centered Batata Mania Logo with Dark Theme mapping */}
         <div id="footer-logo-container" className="mb-6">
           <Logo theme="dark" size="lg" />
