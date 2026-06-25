@@ -207,7 +207,7 @@ export default function App() {
           <div className="w-full md:w-1/2 relative z-10">
             <div className="aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white relative group-hover:shadow-green-600/20 transition-all duration-500">
               <img
-                src="/combo-hexa.jpeg"
+                src="/combo-hexa.webp"
                 alt="Combo do Hexa"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
