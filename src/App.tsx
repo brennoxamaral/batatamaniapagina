@@ -19,34 +19,35 @@ interface PotatoDish {
 const MENU_POTATOES: PotatoDish[] = [
   {
     id: "menu-1",
-    name: "Batata Bacon Mania",
-    price: "R$ 28,90",
-    description: "Nossa queridinha! Batata inglesa gigante recheada com muito cheddar cremoso, pedaços generosos de bacon super crocante e cebolinha fresca.",
-    badge: "Mais Vendida 🔥",
-    ingredients: ["Batata Gigante", "Cheddar Artesanal", "Bacon Premium", "Cebolinha"],
+    name: "ESTROGONOFE DE FRANGO",
+    price: "R$ 34,00",
+    description: "Batata recheada de estrogonofe de frango, finalizada com muçarela, farofa de bacon, cheiro verde e requeijão cremoso Catupiry.",
+    badge: "No pote",
+    ingredients: ["Estrogonofe de Frango", "Muçarela", "Farofa de Bacon", "Cheiro Verde", "Requeijão Catupiry"],
   },
   {
     id: "menu-2",
-    name: "Batata Strogonoff de Carne",
-    price: "R$ 32,90",
-    description: "Sabor supremo de strogonoff de carne bovina macia, creme de leite fresco e finalizado com uma montanha de batata palha artesanal crocante.",
-    badge: "Gourmet ✨",
-    ingredients: ["Batata Gigante", "Strogonoff de Carne", "Batata Palha", "Champignon"],
+    name: "ESTROGONOFE DE CARNE",
+    price: "R$ 38,00",
+    description: "Batata recheada de estrogonofe de carne, finalizada com muçarela, farofa de bacon, cheiro verde e requeijão cremoso Catupiry.",
+    badge: "No pote",
+    ingredients: ["Estrogonofe de Carne", "Muçarela", "Farofa de Bacon", "Cheiro Verde", "Requeijão Catupiry"],
   },
   {
     id: "menu-3",
-    name: "Batata Frango Catupiry",
-    price: "R$ 29,90",
-    description: "Peito de frango temperado desfiado com requeijão Catupiry legítimo, milho doce e queijo mussarela gratinado no forno para derreter de verdade.",
-    ingredients: ["Batata Gigante", "Frango Desfiado", "Catupiry Original", "Mussarela"],
+    name: "FRANGO DESFIADO",
+    price: "R$ 36,00",
+    description: "Batata rosti recheada com frango desfiado, muçarela, cheiro verde e milho.",
+    badge: "Rosti",
+    ingredients: ["Frango Desfiado", "Muçarela", "Cheiro Verde", "Milho"],
   },
   {
     id: "menu-4",
-    name: "Batata Suprema Quatro Queijos",
-    price: "R$ 31,90",
-    description: "Para os apaixonados por queijo: combinação harmonizada de mussarela gratinada, provolone defumado, gorgonzola marcante e requeijão cremoso.",
-    badge: "Irresistível 🧀",
-    ingredients: ["Batata Gigante", "Mussarela", "Provolone", "Gorgonzola", "Requeijão"],
+    name: "CARNE DESFIADA",
+    price: "R$ 39,00",
+    description: "Batata rosti recheada com carne desfiada, muçarela, alho frito e tomate picado.",
+    badge: "Rosti",
+    ingredients: ["Carne Desfiada", "Muçarela", "Alho Frito", "Tomate Picado"],
   },
 ];
 
@@ -79,20 +80,19 @@ export default function App() {
       <PotatoPattern />
 
       {/* HEADER SECTION - Centered Logo */}
-      <header id="landing-header" className="relative z-10 w-full pt-6 pb-2 px-4 flex items-center justify-center">
+      <header id="landing-header" className="relative z-10 w-full pt-8 pb-6 md:pt-12 md:pb-8 px-4 flex items-center justify-center">
         <motion.div
           id="header-logo-wrapper"
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="backdrop-blur-md bg-white/30 border border-white/40 py-2 px-6 rounded-full shadow-md"
         >
           <Logo theme="light" size="md" />
         </motion.div>
       </header>
 
       {/* HERO SECTION */}
-      <section id="hero-section" className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-12 max-w-4xl mx-auto">
+      <section id="hero-section" className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-4 pb-12 md:pt-6 max-w-4xl mx-auto">
 
         {/* Highlight Block: "Sabor que apaixona" in handwriting */}
         <div className="mb-6 flex justify-center">
@@ -236,13 +236,19 @@ export default function App() {
                 <div className="bg-green-100 p-1.5 rounded-lg text-green-700 shrink-0">
                   <Star size={16} className="text-yellow-600 fill-yellow-500" />
                 </div>
-                <span className="text-sm font-bold text-[#4B3621]">2 Batatas gigantes recheadas <span className="font-normal text-[#4B3621]/70">(Sabor à sua escolha)</span></span>
+                <span className="text-sm font-bold text-[#4B3621]">1 Batata recheada de estrogonofe de carne (500g)</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="bg-green-100 p-1.5 rounded-lg text-green-700 shrink-0">
+                  <Star size={16} className="text-yellow-600 fill-yellow-500" />
+                </div>
+                <span className="text-sm font-bold text-[#4B3621]">1 Batata recheada de estrogonofe de frango (500g)</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="bg-green-100 p-1.5 rounded-lg text-green-700 shrink-0">
                   <span className="text-sm px-0.5 font-black">2L</span>
                 </div>
-                <span className="text-sm font-bold text-[#4B3621]">1 Guaraná Antarctica 2L</span>
+                <span className="text-sm font-bold text-[#4B3621]">1 Coca-Cola 2L</span>
               </li>
             </ul>
 
@@ -338,6 +344,13 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        {/* Informative banner about online menu */}
+        <div className="text-center mt-12 bg-white/20 backdrop-blur-sm py-4 px-6 rounded-2xl border border-white/30 max-w-2xl mx-auto shadow-sm">
+          <p className="text-sm md:text-base font-semibold text-[#4B3621]">
+            Além dessas opções tem muitas outras no nosso cardápio digital.
+          </p>
+        </div>
       </section>
 
 
@@ -386,7 +399,7 @@ export default function App() {
 
         {/* Centered Batata Mania Logo with Dark Theme mapping */}
         <div id="footer-logo-container" className="mb-6">
-          <Logo theme="dark" size="lg" />
+          <Logo theme="dark" size="md" />
         </div>
 
         {/* Horizontal divider */}
