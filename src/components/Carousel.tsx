@@ -55,16 +55,17 @@ interface CarouselVideoProps {
   src: string;
   isActive: boolean;
   preload: "auto" | "metadata" | "none";
+  isPaused: boolean;
 }
 
-function CarouselVideo({ src, isActive, preload }: CarouselVideoProps) {
+function CarouselVideo({ src, isActive, preload, isPaused }: CarouselVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (isActive) {
+    if (isActive && !isPaused) {
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
@@ -73,14 +74,25 @@ function CarouselVideo({ src, isActive, preload }: CarouselVideoProps) {
       }
     } else {
       video.pause();
-      // Em vez de forçar o reset imediato para 0 (que pode piscar), definimos o tempo de volta para 0.1
       try {
         video.currentTime = 0.1;
       } catch (e) {
         // Ignora erros caso o elemento de mídia ainda não tenha carregado metadados
       }
     }
-  }, [isActive]);
+  }, [isActive, isPaused]);
+
+  // Garante a liberação de recursos de mídia ao desmontar o componente
+  useEffect(() => {
+    const video = videoRef.current;
+    return () => {
+      if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      }
+    };
+  }, []);
 
   return (
     <video
@@ -91,6 +103,45 @@ function CarouselVideo({ src, isActive, preload }: CarouselVideoProps) {
       playsInline
       preload={preload}
       className="w-full h-full object-cover"
+    />
+  );
+}
+
+// Componente de player de vídeo otimizado para o modal, liberando recursos ao desmontar
+interface ModalVideoPlayerProps {
+  src: string;
+}
+
+function ModalVideoPlayer({ src }: ModalVideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.log("Autoplay do modal impedido:", error);
+      });
+    }
+
+    return () => {
+      if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      }
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      controls
+      playsInline
+      className="w-full h-full object-contain"
     />
   );
 }
@@ -107,24 +158,15 @@ export default function Carousel() {
   const [selectedVideo, setSelectedVideo] = useState<UGCItem | null>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Estado para adiar o carregamento de vídeos até que a página esteja completamente carregada (PageSpeed)
+  // Estado para adiar o carregamento de vídeos até que a página esteja montada (PageSpeed/Smooth transition)
   const [shouldLoadVideos, setShouldLoadVideos] = useState(false);
 
   useEffect(() => {
-    const handlePageLoad = () => {
-      // Pequeno atraso de 600ms para garantir que as animações de entrada iniciais do site tenham terminado
-      const timer = setTimeout(() => {
-        setShouldLoadVideos(true);
-      }, 600);
-      return () => clearTimeout(timer);
-    };
-
-    if (document.readyState === "complete") {
-      handlePageLoad();
-    } else {
-      window.addEventListener("load", handlePageLoad);
-      return () => window.removeEventListener("load", handlePageLoad);
-    }
+    // Pequeno atraso de 500ms para garantir que as animações de entrada iniciais do site tenham terminado
+    const timer = setTimeout(() => {
+      setShouldLoadVideos(true);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   // Configuração de largura e espaçamento responsivos dos cards
@@ -159,9 +201,9 @@ export default function Carousel() {
     setActiveIndex((prev) => prev - 1);
   };
 
-  // Temporizador do Autoplay
+  // Temporizador do Autoplay (pausa se o modal estiver aberto)
   useEffect(() => {
-    if (autoPlay) {
+    if (autoPlay && !selectedVideo) {
       autoPlayTimerRef.current = setInterval(() => {
         handleNext();
       }, 4200);
@@ -171,7 +213,7 @@ export default function Carousel() {
         clearInterval(autoPlayTimerRef.current);
       }
     };
-  }, [autoPlay, activeIndex]);
+  }, [autoPlay, activeIndex, selectedVideo]);
 
   // Restaura a transição de mola elástica no próximo frame após um salto instantâneo
   useEffect(() => {
@@ -289,8 +331,8 @@ export default function Carousel() {
         >
           {extendedData.map((item, index) => {
             const isActive = index === activeIndex;
-            // Só renderiza o vídeo se estiver ativo ou se for um vizinho próximo (distância de até 2)
-            const isNearActive = Math.abs(index - activeIndex) <= 2;
+            // Só renderiza o vídeo se estiver ativo ou se for um vizinho imediato (distância de até 1)
+            const isNearActive = Math.abs(index - activeIndex) <= 1;
 
             return (
               <motion.div
@@ -321,6 +363,7 @@ export default function Carousel() {
                         src={item.videoUrl}
                         isActive={isActive}
                         preload={isActive ? "auto" : "metadata"}
+                        isPaused={selectedVideo !== null}
                       />
                     ) : (
                       <VideoPlaceholder />
@@ -387,13 +430,7 @@ export default function Carousel() {
             >
               {/* Player de Vídeo com Controles e Áudio habilitado */}
               <div className="relative flex-1 bg-black overflow-hidden flex items-center justify-center">
-                <video
-                  src={selectedVideo.videoUrl}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                />
+                <ModalVideoPlayer src={selectedVideo.videoUrl} />
 
                 {/* Botão flutuante para fechar */}
                 <div className="absolute top-4 right-4 z-30">
