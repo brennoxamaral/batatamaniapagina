@@ -32,6 +32,9 @@ const UGC_DATA: UGCItem[] = [
   },
 ];
 
+// Cache de thumbnails global na memória para evitar reprocessamento de frames
+const thumbnailCache: Record<string, string> = {};
+
 // Componente de placeholder premium para lazy loading dos vídeos
 function VideoPlaceholder() {
   return (
@@ -50,39 +53,140 @@ function VideoPlaceholder() {
   );
 }
 
-// Componente auxiliar para reproduzir o vídeo de depoimento de forma inteligente e performática
-interface CarouselVideoProps {
-  src: string;
-  isActive: boolean;
-  preload: "auto" | "metadata" | "none";
-  isPaused: boolean;
+// Hook personalizado para capturar o primeiro frame do vídeo via Canvas (como thumbnail)
+function useVideoThumbnail(videoUrl: string) {
+  const [thumbnail, setThumbnail] = useState<string | null>(thumbnailCache[videoUrl] || null);
+  const [loading, setLoading] = useState(!thumbnailCache[videoUrl] && !!videoUrl);
+
+  useEffect(() => {
+    if (!videoUrl || thumbnail) return;
+
+    let isMounted = true;
+    const video = document.createElement("video");
+    video.src = videoUrl;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.currentTime = 0.5; // Captura em 0.5s para evitar tela inicial preta
+
+    const handleSeeked = () => {
+      if (!isMounted) return;
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 180;
+        canvas.height = 320;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          thumbnailCache[videoUrl] = dataUrl;
+          setThumbnail(dataUrl);
+        }
+      } catch (err) {
+        console.warn("Falha ao gerar Canvas Thumbnail:", err);
+      } finally {
+        setLoading(false);
+        cleanup();
+      }
+    };
+
+    const handleError = () => {
+      if (isMounted) setLoading(false);
+      cleanup();
+    };
+
+    const cleanup = () => {
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("error", handleError);
+      video.removeAttribute("src");
+      video.load();
+    };
+
+    video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("error", handleError);
+
+    return () => {
+      isMounted = false;
+      cleanup();
+    };
+  }, [videoUrl]);
+
+  return { thumbnail, loading };
 }
 
-function CarouselVideo({ src, isActive, preload, isPaused }: CarouselVideoProps) {
+// Componente para renderizar a thumbnail estática do card
+interface CardThumbnailProps {
+  item: UGCItem;
+  isActive: boolean;
+  shouldLoad: boolean;
+}
+
+function CardThumbnail({ item, isActive, shouldLoad }: CardThumbnailProps) {
+  const { thumbnail } = useVideoThumbnail(shouldLoad ? item.videoUrl : "");
+
+  return (
+    <div className="w-full h-full relative aspect-[9/16] overflow-hidden bg-[#4B3621]/5 rounded-3xl">
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt="Depoimento de Cliente"
+          className="w-full h-full object-cover transition-opacity duration-300 rounded-3xl select-none pointer-events-none"
+        />
+      ) : (
+        <VideoPlaceholder />
+      )}
+      
+      {/* Indicador sutil de reprodução nos cards inativos */}
+      {!isActive && (
+        <div className="absolute inset-0 bg-[#4B3621]/5 hover:bg-[#4B3621]/15 transition-all duration-300 flex items-center justify-center z-10">
+          <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white/75 shadow-sm scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 fill-current">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente de Player de Vídeo Flutuante Único que acompanha o card ativo no trilho
+interface ActiveVideoPlayerProps {
+  src: string;
+  cardWidth: number;
+  gap: number;
+  activeIndex: number;
+  isPaused: boolean;
+  isVisible: boolean;
+}
+
+function ActiveVideoPlayer({ src, cardWidth, gap, activeIndex, isPaused, isVisible }: ActiveVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playError, setPlayError] = useState(false);
+
+  // A posição horizontal do player flutuante é calculada de forma exata baseada na largura e gap dos cards
+  const leftPosition = activeIndex * (cardWidth + gap);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (isActive && !isPaused) {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay impedido ou pausado:", error);
-        });
-      }
-    } else {
+    if (isPaused || !isVisible) {
       video.pause();
-      try {
-        video.currentTime = 0.1;
-      } catch (e) {
-        // Ignora erros caso o elemento de mídia ainda não tenha carregado metadados
-      }
+      return;
     }
-  }, [isActive, isPaused]);
 
-  // Garante a liberação de recursos de mídia ao desmontar o componente
+    setPlayError(false);
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.warn("Autoplay bloqueado no mobile:", error);
+        setPlayError(true);
+      });
+    }
+  }, [src, isPaused, isVisible]);
+
+  // Garante liberação correta de recursos ao desmontar ou trocar de src
   useEffect(() => {
     const video = videoRef.current;
     return () => {
@@ -95,15 +199,47 @@ function CarouselVideo({ src, isActive, preload, isPaused }: CarouselVideoProps)
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      src={`${src}#t=0.1`}
-      muted
-      loop
-      playsInline
-      preload={preload}
-      className="w-full h-full object-cover"
-    />
+    <div
+      style={{
+        position: "absolute",
+        left: `${leftPosition}px`,
+        width: `${cardWidth}px`,
+        top: "16px", // Alinhado com o py-4 do container do card (16px)
+        bottom: "16px",
+        zIndex: 30,
+        pointerEvents: "none", // Permite que toques/cliques passem para o botão do card subjacente
+      }}
+      className="transition-all duration-300 ease-out"
+    >
+      <div className="w-full h-full relative aspect-[9/16] overflow-hidden rounded-3xl shadow-2xl shadow-[#4B3621]/30">
+        <video
+          ref={videoRef}
+          src={src}
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover rounded-3xl"
+        />
+        {/* Degradê horizontal premium */}
+        <div
+          className="absolute inset-0 pointer-events-none z-10 rounded-3xl"
+          style={{
+            background: "linear-gradient(to right, rgba(242, 235, 227, 0.4) 0%, rgba(242, 235, 227, 0) 8%, rgba(242, 235, 227, 0) 92%, rgba(242, 235, 227, 0.4) 100%)",
+          }}
+        />
+        {/* Exibe botão de Play visual caso o navegador silencie/bloqueie autoplay */}
+        {playError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] z-20 rounded-3xl">
+            <div className="w-14 h-14 rounded-full bg-white/95 flex items-center justify-center text-[#4B3621] shadow-lg animate-pulse">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 fill-current">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+              </svg>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -158,15 +294,41 @@ export default function Carousel() {
   const [selectedVideo, setSelectedVideo] = useState<UGCItem | null>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Estado para adiar o carregamento de vídeos até que a página esteja montada (PageSpeed/Smooth transition)
+  // Monitorar visibilidade da seção e aba da página para controle inteligente de execução
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isSectionVisible, setIsSectionVisible] = useState(true);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const [shouldLoadVideos, setShouldLoadVideos] = useState(false);
 
   useEffect(() => {
-    // Pequeno atraso de 500ms para garantir que as animações de entrada iniciais do site tenham terminado
+    // Atraso de 500ms para aguardar a montagem do site e animações de entrada
     const timer = setTimeout(() => {
       setShouldLoadVideos(true);
     }, 500);
-    return () => clearTimeout(timer);
+
+    // Monitor do estado da aba/janela
+    const handleVisibility = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Monitor de visibilidade da seção na tela
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSectionVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      observer.disconnect();
+    };
   }, []);
 
   // Configuração de largura e espaçamento responsivos dos cards
@@ -201,9 +363,9 @@ export default function Carousel() {
     setActiveIndex((prev) => prev - 1);
   };
 
-  // Temporizador do Autoplay (pausa se o modal estiver aberto)
+  // Temporizador do Autoplay (pausa se o modal estiver aberto, se a aba estiver oculta ou se a seção estiver fora de tela)
   useEffect(() => {
-    if (autoPlay && !selectedVideo) {
+    if (autoPlay && !selectedVideo && isSectionVisible && isPageVisible) {
       autoPlayTimerRef.current = setInterval(() => {
         handleNext();
       }, 4200);
@@ -213,9 +375,9 @@ export default function Carousel() {
         clearInterval(autoPlayTimerRef.current);
       }
     };
-  }, [autoPlay, activeIndex, selectedVideo]);
+  }, [autoPlay, activeIndex, selectedVideo, isSectionVisible, isPageVisible]);
 
-  // Restaura a transição de mola elástica no próximo frame após um salto instantâneo
+  // Restaura a transição no próximo frame após um salto instantâneo
   useEffect(() => {
     if (!transitionEnabled) {
       const raf = requestAnimationFrame(() => {
@@ -240,35 +402,32 @@ export default function Carousel() {
 
   // Manipulador do fim da animação do carrossel para reposicionamento instantâneo
   const handleAnimationComplete = () => {
-    // Se avançou além da cópia do meio, dá o salto imperceptível para trás
     if (activeIndex >= 3 * L) {
       setTransitionEnabled(false);
       setActiveIndex(activeIndex - L);
     }
-    // Se retrocedeu aquém da cópia do meio, dá o salto imperceptível para frente
     else if (activeIndex < L) {
       setTransitionEnabled(false);
       setActiveIndex(activeIndex + L);
     }
   };
 
-  // Gestos de arrastar para deslizar e encaixar (snap) nos cartões
+  // Gestos de arrastar otimizados para suavidade no mobile (snap)
   const handleDragEnd = (
     event: any,
     info: { offset: { x: number }; velocity: { x: number } }
   ) => {
-    const swipeThreshold = 50; // limite de pixels para mudar de card
+    const swipeThreshold = 40; // Reduzido ligeiramente de 50 para 40 para ser mais sensível e fácil no mobile
     const offset = info.offset.x;
     const velocity = info.velocity.x;
 
     let newIndex = activeIndex;
-    if (offset < -swipeThreshold || velocity < -500) {
+    if (offset < -swipeThreshold || velocity < -400) {
       newIndex = activeIndex + 1;
-    } else if (offset > swipeThreshold || velocity > 500) {
+    } else if (offset > swipeThreshold || velocity > 400) {
       newIndex = activeIndex - 1;
     }
 
-    // Mantém o índice dentro dos limites de segurança dos dados estendidos
     newIndex = Math.max(0, Math.min(extendedData.length - 1, newIndex));
 
     handleManualAction(() => {
@@ -276,8 +435,11 @@ export default function Carousel() {
     });
   };
 
+  // Determinar se o vídeo ativo pode tocar (ativo, visível e modal fechado)
+  const isVideoPlaying = isSectionVisible && isPageVisible && !selectedVideo;
+
   return (
-    <div id="ugc-carousel-section" className="relative w-full max-w-7xl mx-auto px-4 py-8">
+    <div id="ugc-carousel-section" ref={sectionRef} className="relative w-full max-w-7xl mx-auto px-4 py-8">
 
       {/* Cabeçalho com Título e Setas de Navegação */}
       <div className="flex flex-col items-center justify-center mb-8 gap-4">
@@ -331,8 +493,8 @@ export default function Carousel() {
         >
           {extendedData.map((item, index) => {
             const isActive = index === activeIndex;
-            // Só renderiza o vídeo se estiver ativo ou se for um vizinho imediato (distância de até 1)
-            const isNearActive = Math.abs(index - activeIndex) <= 1;
+            // Carrega as thumbnails dos cards vizinhos em cache (até 2 de distância para pré-carregamento suave)
+            const shouldLoadThumbnail = shouldLoadVideos && Math.abs(index - activeIndex) <= 2;
 
             return (
               <motion.div
@@ -356,34 +518,28 @@ export default function Carousel() {
                     }`}
                   aria-label={`Reproduzir depoimento ${index + 1}`}
                 >
-                  {/* Seção do Vídeo - Proporção exata de 9:16 */}
-                  <div className="relative aspect-[9/16] w-full overflow-hidden bg-[#4B3621]/5 rounded-3xl">
-                    {shouldLoadVideos && isNearActive ? (
-                      <CarouselVideo
-                        src={item.videoUrl}
-                        isActive={isActive}
-                        preload={isActive ? "auto" : "metadata"}
-                        isPaused={selectedVideo !== null}
-                      />
-                    ) : (
-                      <VideoPlaceholder />
-                    )}
-
-                    {/* Camada absoluta de degradê linear horizontal nas laterais do item ativo */}
-                    <motion.div
-                      className="absolute inset-0 pointer-events-none z-10 rounded-3xl"
-                      style={{
-                        background: "linear-gradient(to right, rgba(242, 235, 227, 0.5) 0%, rgba(242, 235, 227, 0) 8%, rgba(242, 235, 227, 0) 92%, rgba(242, 235, 227, 0.5) 100%)",
-                      }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: isActive ? 1 : 0 }}
-                      transition={{ duration: 0.4 }}
-                    />
-                  </div>
+                  <CardThumbnail
+                    item={item}
+                    isActive={isActive}
+                    shouldLoad={shouldLoadThumbnail}
+                  />
                 </button>
               </motion.div>
             );
           })}
+
+          {/* PLAYER DE VÍDEO FLUTUANTE ÚNICO: Ele flutua sobre o card ativo e o acompanha no trilho sem remontar no DOM */}
+          {shouldLoadVideos && (
+            <ActiveVideoPlayer
+              key="active-video-player"
+              src={extendedData[activeIndex].videoUrl}
+              cardWidth={cardWidth}
+              gap={gap}
+              activeIndex={activeIndex}
+              isPaused={!isVideoPlaying}
+              isVisible={isSectionVisible && isPageVisible}
+            />
+          )}
         </motion.div>
       </div>
 
