@@ -4,7 +4,7 @@ import { Phone, Navigation, Clock, ShieldCheck, Heart, ArrowRight, Trophy, Star 
 import Logo from "./components/Logo";
 import PotatoPattern from "./components/PotatoPattern";
 import HighlightBlock from "./components/HighlightBlock";
-import Carousel from "./components/Carousel";
+// import Carousel from "./components/Carousel";
 
 // Structured signature stuffed potato dishes
 interface PotatoDish {
@@ -187,10 +187,11 @@ export default function App() {
         </div>
       </section>
 
-      {/* UGC CAROUSEL SECTION */}
+      {/* UGC CAROUSEL SECTION - DESATIVADO TEMPORARIAMENTE
       <section id="ugc-carousel-landing" className="relative z-10 w-full bg-white/25 backdrop-blur-xs py-8 border-y border-[#4B3621]/10 my-8">
         <Carousel />
       </section>
+      */}
 
 
       {/* COMBO DO HEXA SECTION */}
