@@ -194,10 +194,9 @@ export default function App() {
       */}
 
 
-      {/* COMBO DO HEXA SECTION */}
+      {/* COMBO DO HEXA SECTION - DESATIVADO TEMPORARIAMENTE
       <section id="combo-hexa" className="relative z-10 w-full max-w-5xl mx-auto px-4 py-8">
         <div className="bg-gradient-to-br from-[#F0FDF4] to-[#FEFCE8] border border-[#BBF7D0] rounded-3xl p-6 md:p-10 shadow-[0_10px_40px_-10px_rgba(22,163,74,0.15)] flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden group">
-          {/* Decorative trophies/stars */}
           <div className="absolute -top-10 -right-10 text-green-700/5 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-12">
             <Trophy size={200} fill="currentColor" />
           </div>
@@ -275,6 +274,7 @@ export default function App() {
           </div>
         </div>
       </section>
+      */}
 
       {/* SIGNATURE DISH INTERACTIVE ROSTER */}
       <section id="menu-section" className="relative z-10 w-full max-w-7xl mx-auto px-4 py-8">
